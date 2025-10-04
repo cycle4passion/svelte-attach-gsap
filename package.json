@@ -1,7 +1,15 @@
 {
 	"name": "svelte-attach-gsap",
+	"author": {
+		"name": "Scott Rhamy"
+	},
 	"version": "0.0.1",
 	"license": "MIT",
+	"main": "dist/index.ts",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cycle4passion/svelte-attach-gsap.git"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",

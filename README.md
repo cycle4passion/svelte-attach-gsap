@@ -1,14 +1,14 @@
 # svelte-attach-gsap
 
-A Svelte 5 library that seamlessly integrates a subset of common GSAP animations functionality using Svelte's `@attach` directive. Create smooth, performant animations with a clean, declarative syntax and advanced timeline ordering capabilities. This provides clean implementation of GSAP in Svelte, similar to how Svelte in/out directives work simple transitions, or animation directives works for simple animations.
+A Svelte 5 library that seamlessly integrates a subset of common GSAP animations functionality using Svelte's `@attach` directive. This provides a clean implementation of GSAP in Svelte, similar to how Svelte in/out directives work for simple transitions, or animation directives.
 
 ## Features
 
-- 🎬 **Declarative animations** - Use GSAP animations directly in your Svelte templates with `@attach`
+- 🎬 **Declarative animations** - Use GSAP animations directly in your Svelte templates with `@attach toGSAP`
 - ⏱️ **Timeline ordering** - Control animation sequence with optional order parameters
-- 🧹 **Automatic cleanup** - Animations are automatically cleaned up when components unmount
 - 🔧 **Subset GSAP API** - Access to `to`, `from`, `fromTo`, `set`
 - 📈 **Timeline control** - Create complex animation sequences with `createTimeline()`
+- 🧹 **Automatic cleanup** - Animations are automatically cleaned up when components unmount
 - 🎯 **Type-safe** - Written in TypeScript with full type support
 - 📦 **Exports the `gsap` instance** - For advanced use cases
 
@@ -24,7 +24,7 @@ yarn add svelte-attach-gsap gsap
 
 ## Before we start
 
-To integrate JS libraries, like GSAP, would add some binding to DOM elements, then use OnMount to initialize...
+To integrate JS libraries in Svelte, like GSAP, you would add some binding to DOM elements, then use OnMount to initialize...
 
 ```ts
 <script lang="ts">
@@ -43,7 +43,7 @@ To integrate JS libraries, like GSAP, would add some binding to DOM elements, th
 </main>
 ```
 
-A little cleaner solution would be to write an use:gsap action, but these have been sunsetted in Svelte 5 for `@attach` directives. This is the impetus for this package which is essentially a wrapper for GSAP. This means we can use GSAP's common animation methods directly in the markup, and Svelte will handle the lifecycle for us.
+A little cleaner solution would be to write an a svelte action (use:gsap), but actions are on the way out. Svelte 5 has an `@attach` directives. This is the impetus for this package providing GSAP's common animation methods directly in the markup, and Svelte will handle the lifecycle for us.
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ A little cleaner solution would be to write an use:gsap action, but these have b
 <div {@attach toGSAP.to({ rotation: 360 })}>Box</div>
 ```
 
-It also supports chaining them together:
+even supporting chaining them together:
 
 ```html
 <div {@attach toGSAP.from({ opacity: 0, duration: 1 })
@@ -66,11 +66,11 @@ It also supports chaining them together:
 </div>
 ```
 
-### Timeline with Ordering
+### Timelines with Ordering
 
-Timelines in GSAP are allow for more control of animation(s). GSAP has no need for ordering because the order of animations is determined by the sequence of method calls. Since we are now moving timeline actions to DOM elements, the DOM order quite likely does not match the desired animation order. To address this, `svelte-attach-gsap` introduces an optional `order` parameter in timeline methods.
+Timelines in GSAP are allow for complex control of your animation(s). GSAP native has no need for ordering because the order of animations is determined by the sequence of method calls. Since we are now moving timeline actions to DOM elements, the DOM order quite likely does not match the desired animation order. To address this, `svelte-attach-gsap` introduces an optional `order` parameter in timeline methods.
 
-In GSAP timelines accept a position parameter which can be a label, absolute time, or relative time. For `svelte-attach-gsap` it has been an object `{order?: number, position?: string | number}`. Note if DOM order happens to matches animation order, you can omit the order parameter.
+In GSAP native timelines accept a position parameter which can be a label, absolute time, or relative time. For `svelte-attach-gsap` it has been replaced by an object `{order?: number, position?: string | number}`. Note if DOM order happens to matches animation order, you can omit the order parameter.
 
 ```ts
 <script lang="ts">
@@ -79,7 +79,7 @@ In GSAP timelines accept a position parameter which can be a label, absolute tim
 </script>
 
 <div class="container">
-  <button onclick={() => tl.controls.play()}>Play Animation</button>
+  <button onclick={() => tl.controls.play()}>Play Timeline</button>
   
   <div {@attach toGSAP.tl.to({ x: 100 }, { order: 3 })}>DOM #1, Anim #3</div>
   <div {@attach toGSAP.tl.to({ y: 100 }, { order: 1, postition: "-=0.25" })}>DOM #2, Anim #1</div>
@@ -87,20 +87,14 @@ In GSAP timelines accept a position parameter which can be a label, absolute tim
 </div>
 ```
 
-I native GSAP the same examples is quite verbose and adds complexity using context to avoid multiple DOM element binding.
+In native GSAP the same example is lengthy and adds complexity having to use context to avoid multiple DOM element binding.
 
 ```ts
 <script lang="ts">
   import { onMount } from "svelte";
   import gsap from "gsap";
 
-  console.clear();
-
   let boxesContainer, tl;
-
-  const toggleTimeline = () => {
-    tl.reversed(!tl.reversed());
-  };
 
   onMount(() => {
     const ctx = gsap.context((self) => {
@@ -118,7 +112,7 @@ I native GSAP the same examples is quite verbose and adds complexity using conte
 
 <main>
   <section class="boxes-container" bind:this={boxesContainer}>
-    <button on:click={toggleTimeline}>Toggle Timeline</button>
+    <button on:click={() => tl.controls.play()}>Play Timeline</button>
     <div class="box">Box 1</div>
     <div class="box">Box 2</div>
     <div class="box">Box 3</div>
@@ -126,25 +120,8 @@ I native GSAP the same examples is quite verbose and adds complexity using conte
 </main>
 ```
 
-## Development
-
-```sh
-# Clone the repository
-git clone <repository-url>
-cd svelte-attach-gsap
-
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Build the library
-pnpm build
-
-# Run tests
-pnpm test
-```
+## Thank You
+A big thank you to [GSAP](https://greensock.com/gsap/) for their incredible animation library and to the Svelte team for creating such a powerful framework.
 
 ## License
 

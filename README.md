@@ -34,7 +34,6 @@ To integrate JS libraries, like GSAP, would add some binding to DOM elements, th
   let box: HTMLElement;
 
   onMount(() => {
-    const ctx = gsap.context((self) => {
       gsap.to(box, { rotation: 360 });
   });
 </script>
@@ -88,7 +87,7 @@ In GSAP timelines accept a position parameter which can be a label, absolute tim
 </div>
 ```
 
-IN GSAP the same examples is quite verbose and adds complexity using context to avoid multiple DOM element binding in native GSAP.
+I native GSAP the same examples is quite verbose and adds complexity using context to avoid multiple DOM element binding.
 
 ```ts
 <script lang="ts">

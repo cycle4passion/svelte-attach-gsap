@@ -1,6 +1,6 @@
 # svelte-attach-gsap
 
-A Svelte 5 library that seamlessly integrates a subset of common GSAP animations functionality using Svelte's `@attach` directive. Create smooth, performant animations with a clean, declarative syntax and advanced timeline ordering capabilities. This makes the power of GSAP in Svelte, similar to how Svelte in/out directives work simple transitions, or animation diretive works for simple animations.
+A Svelte 5 library that seamlessly integrates a subset of common GSAP animations functionality using Svelte's `@attach` directive. Create smooth, performant animations with a clean, declarative syntax and advanced timeline ordering capabilities. This provides clean implementation of GSAP in Svelte, similar to how Svelte in/out directives work simple transitions, or animation directives works for simple animations.
 
 ## Features
 

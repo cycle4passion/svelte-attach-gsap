@@ -12,6 +12,10 @@ A Svelte 5 library that seamlessly integrates a subset of common GSAP animations
 - 🎯 **Type-safe** - Written in TypeScript with full type support
 - 📦 **Exports the `gsap` instance** - For advanced use cases
 
+## See it in Action
+
+[Svelte REPL](https://svelte.dev/playground/92e2a0d7a8d24c22aa6b291d2c88c43d?version=5.39.8)
+
 ## Installation
 
 ```sh

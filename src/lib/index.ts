@@ -89,25 +89,21 @@ class TimelineUtils {
 		return startingOrderForUnordered + item.id;
 	}
 
+	// Add this method to TimelineUtils class
 	static parseTimelineOptions(
 		positionOrOptions?: string | number | { position?: string | number; order?: number },
 		order?: number
-	): { position: string | number; order?: number } {
-		let position: string | number = '';
-		let finalOrder: number | undefined;
-
-		// Handle different parameter patterns
+	): { position?: string | number; order?: number } {
 		if (typeof positionOrOptions === 'object' && positionOrOptions !== null) {
-			// Pattern: (vars, { position?, order? })
-			position = positionOrOptions.position || '';
-			finalOrder = positionOrOptions.order;
-		} else {
-			// Pattern: (vars, position, order) - standard GSAP
-			position = positionOrOptions || '';
-			finalOrder = order;
+			return {
+				position: positionOrOptions.position,
+				order: positionOrOptions.order
+			};
 		}
-
-		return { position, order: finalOrder };
+		return {
+			position: positionOrOptions,
+			order: order
+		};
 	}
 }
 
@@ -418,7 +414,7 @@ class Timeline {
 	private rebuildTimeline() {
 		this.timeline.clear();
 
-		// Find the highest explicit order value
+		// Sort animations by order
 		const store = this.animationStore['getStore']();
 		const maxExplicitOrder = store.reduce((max, item) => {
 			return item.order !== undefined ? Math.max(max, item.order) : max;
@@ -432,7 +428,13 @@ class Timeline {
 
 		for (const { gsapMethod, element, args } of sortedTweens) {
 			const tween = gsapMethod(element, ...args);
-			this.timeline.add(tween);
+			// Extract position from args if it exists
+			const position = args[args.length - 1];
+			if (typeof position === 'string' || typeof position === 'number') {
+				this.timeline.add(tween, position);
+			} else {
+				this.timeline.add(tween);
+			}
 		}
 	}
 

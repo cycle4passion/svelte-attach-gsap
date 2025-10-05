@@ -37,6 +37,7 @@ interface TweenData {
 	gsapMethod: (...args: unknown[]) => gsap.core.Tween;
 	element: Element;
 	args: unknown[];
+	position?: string | number;
 	order?: number;
 	id: number;
 }
@@ -426,11 +427,10 @@ class Timeline {
 			return orderA - orderB;
 		});
 
-		for (const { gsapMethod, element, args } of sortedTweens) {
+		for (const { gsapMethod, element, args, position } of sortedTweens) {
 			const tween = gsapMethod(element, ...args);
-			// Extract position from args if it exists
-			const position = args[args.length - 1];
-			if (typeof position === 'string' || typeof position === 'number') {
+			// Use the stored position parameter
+			if (position !== undefined && position !== '') {
 				this.timeline.add(tween, position);
 			} else {
 				this.timeline.add(tween);
@@ -443,10 +443,11 @@ class Timeline {
 		gsapMethod: (...args: unknown[]) => gsap.core.Tween,
 		element: Element,
 		args: unknown[],
-		order?: number
+		order?: number,
+		position?: string | number
 	): () => void {
 		const id = this.animationStore.generateId();
-		const tweenData = { gsapMethod, element, args, order, id };
+		const tweenData = { gsapMethod, element, args, order, position, id };
 		this.animationStore.addToStore(tweenData);
 		this.rebuildTimeline();
 
@@ -749,7 +750,30 @@ class TimelineGSAP {
 			const animations = (attachFunction as AttachFunction).animations || [];
 
 			for (const { method, args, order: animOrder } of animations) {
-				const cleanup = timeline.addAnimation(method, element, args, animOrder);
+				// For the initial animation, position comes from the parsed options
+				// For chained animations, position might be in args
+				let cleanArgs = args;
+				let animPosition: string | number | undefined;
+
+				// If this is the first animation and we have a position from options, use it
+				if (animations.length === 1 && position !== undefined && position !== '') {
+					animPosition = position;
+					// Remove position from args if it was added there
+					if (args.length > baseArgs.length) {
+						cleanArgs = args.slice(0, baseArgs.length);
+					}
+				} else if (
+					args.length > baseArgs.length &&
+					(typeof args[args.length - 1] === 'string' || typeof args[args.length - 1] === 'number')
+				) {
+					// For chained animations, check if position is in args
+					if (methodName !== 'set') {
+						animPosition = args[args.length - 1] as string | number;
+						cleanArgs = args.slice(0, -1);
+					}
+				}
+
+				const cleanup = timeline.addAnimation(method, element, cleanArgs, animOrder, animPosition);
 				cleanupFunctions.push(cleanup);
 			}
 
@@ -759,25 +783,11 @@ class TimelineGSAP {
 			};
 		}) as AttachFunction;
 
-		// Build args correctly based on method and whether position exists
-		let finalArgs: unknown[];
-
-		if (methodName === 'set') {
-			// set() doesn't accept position
-			finalArgs = baseArgs;
-		} else if (position !== undefined && position !== '') {
-			// Add position for to/from/fromTo methods when position exists
-			finalArgs = [...baseArgs, position];
-		} else {
-			// No position needed
-			finalArgs = baseArgs;
-		}
-
-		// Initialize with the current animation
+		// Initialize with the current animation - position is handled separately, not in args
 		attachFunction.animations = [
 			{
 				method: gsap[methodName] as (...args: unknown[]) => gsap.core.Tween,
-				args: finalArgs,
+				args: baseArgs,
 				...(finalOrder !== undefined && { order: finalOrder })
 			}
 		];

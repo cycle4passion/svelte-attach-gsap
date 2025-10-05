@@ -406,6 +406,7 @@ class Timeline {
 	private timeline: gsap.core.Timeline;
 	private animationStore = new AnimationStore<TweenData>();
 	public toGSAP: TimelineGSAP;
+	private rebuildTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(...args: unknown[]) {
 		this.timeline = gsap.timeline({ paused: true, ...args });
@@ -427,15 +428,48 @@ class Timeline {
 			return orderA - orderB;
 		});
 
-		for (const { gsapMethod, element, args, position } of sortedTweens) {
+		// Add animations in order, handling relative positions correctly
+		for (let i = 0; i < sortedTweens.length; i++) {
+			const { gsapMethod, element, args, position } = sortedTweens[i];
 			const tween = gsapMethod(element, ...args);
-			// Use the stored position parameter
+
 			if (position !== undefined && position !== '') {
-				this.timeline.add(tween, position);
+				// Handle relative positions by converting them to absolute positions
+				if (
+					typeof position === 'string' &&
+					(position.startsWith('+=') || position.startsWith('-='))
+				) {
+					// For relative positions, calculate based on current timeline duration
+					const currentDuration = this.timeline.duration();
+					const relativeValue = parseFloat(position.substring(2));
+
+					if (position.startsWith('+=')) {
+						// += means add time after current end
+						this.timeline.add(tween, currentDuration + relativeValue);
+					} else if (position.startsWith('-=')) {
+						// -= means subtract time from current end (overlap)
+						const absolutePosition = Math.max(0, currentDuration - relativeValue);
+						this.timeline.add(tween, absolutePosition);
+					}
+				} else {
+					// Absolute position or other position formats
+					this.timeline.add(tween, position);
+				}
 			} else {
 				this.timeline.add(tween);
 			}
 		}
+	}
+
+	// Debounced rebuild to prevent multiple rapid rebuilds during initialization
+	private scheduleRebuild() {
+		if (this.rebuildTimeout) {
+			clearTimeout(this.rebuildTimeout);
+		}
+		this.rebuildTimeout = setTimeout(() => {
+			this.rebuildTimeline();
+			this.rebuildTimeout = null;
+		}, 0);
 	}
 
 	// Internal method for adding animations
@@ -449,12 +483,12 @@ class Timeline {
 		const id = this.animationStore.generateId();
 		const tweenData = { gsapMethod, element, args, order, position, id };
 		this.animationStore.addToStore(tweenData);
-		this.rebuildTimeline();
+		this.scheduleRebuild();
 
 		// Return cleanup function
 		return () => {
 			this.animationStore.removeFromStore((item) => item.id === id);
-			this.rebuildTimeline();
+			this.scheduleRebuild();
 		};
 	}
 

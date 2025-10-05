@@ -757,11 +757,25 @@ class TimelineGSAP {
 			};
 		}) as AttachFunction;
 
+		// Build args correctly based on method and whether position exists
+		let finalArgs: unknown[];
+
+		if (methodName === 'set') {
+			// set() doesn't accept position
+			finalArgs = baseArgs;
+		} else if (position !== undefined && position !== '') {
+			// Add position for to/from/fromTo methods when position exists
+			finalArgs = [...baseArgs, position];
+		} else {
+			// No position needed
+			finalArgs = baseArgs;
+		}
+
 		// Initialize with the current animation
 		attachFunction.animations = [
 			{
 				method: gsap[methodName] as (...args: unknown[]) => gsap.core.Tween,
-				args: [...baseArgs, position],
+				args: finalArgs,
 				...(finalOrder !== undefined && { order: finalOrder })
 			}
 		];

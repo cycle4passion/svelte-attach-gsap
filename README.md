@@ -82,8 +82,8 @@ In GSAP native timelines accept a position parameter which can be a label, absol
   <button onclick={() => tl.controls.play()}>Play Timeline</button>
   
   <div {@attach toGSAP.tl.to({ x: 100 }, { order: 3 })}>DOM #1, Anim #3</div>
-  <div {@attach toGSAP.tl.to({ y: 100 }, { order: 1, postition: "-=0.25" })}>DOM #2, Anim #1</div>
-  <div {@attach toGSAP.tl.to({ rotation: 180 }, { order: 2 })}>DOM #3, Anim #2</div>
+  <div {@attach toGSAP.tl.to({ y: 100 }, { order: 1 })}>DOM #2, Anim #1</div>
+  <div {@attach toGSAP.tl.to({ rotation: 180 }, { order: 2, position: "-=0.25" })}>DOM #3, Anim #2</div>
 </div>
 ```
 
@@ -100,8 +100,8 @@ In native GSAP the same example is lengthy and adds complexity having to use con
     const ctx = gsap.context((self) => {
       const boxes = self.selector(".box");
       tl = gsap.timeline({ paused: true });
-      tl.to(boxes[0], { x: 100, rotation: 360 })
-        .to(boxes[1], { y: 100, rotation: -360 }, "-=0.25")
+        .to(boxes[1], { y: 100 })
+        .to(boxes[0], { x: 100 }, "-=0.25")
         .to(boxes[2], { rotation: 180 })
         .reverse();
     }, boxesContainer); // <- Scope!
@@ -121,6 +121,7 @@ In native GSAP the same example is lengthy and adds complexity having to use con
 ```
 
 ## Thank You
+
 A big thank you to [GSAP](https://greensock.com/gsap/) for their incredible animation library and to the Svelte team for creating such a powerful framework.
 
 ## License
